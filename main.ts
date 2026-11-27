@@ -14,9 +14,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const line = readFileSync(join(here, "entry.txt"), "utf8");
 
 // Gate: 1-140 characters, one line, not only whitespace.
-if (line.length < 1 || line.length > 140) {
+// Count length in Unicode code points (Array.from), so an astral
+// character counts as one character, not two UTF-16 code units.
+const charCount = Array.from(line).length;
+if (charCount < 1 || charCount > 140) {
   throw new Error(
-    `gate length: entry.txt must be 1-140 characters, got ${line.length}`,
+    `gate length: entry.txt must be 1-140 characters, got ${charCount}`,
   );
 }
 if (line.includes("\n") || line.includes("\r")) {
@@ -54,4 +57,4 @@ if (!writtenBytes.equals(Buffer.from(line, "utf8"))) {
     `verification failed: ${outPath} is not byte-identical to entry.txt`,
   );
 }
-console.log(`Wrote ${line.length}-character entry to ${outPath} (verified byte-identical)`);
+console.log(`Wrote ${charCount}-character entry to ${outPath} (verified byte-identical)`);
